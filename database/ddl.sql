@@ -26,3 +26,21 @@ CREATE TABLE clientes (
     contrasena VARCHAR(100) NOT NULL,
     rol VARCHAR(50) NOT NULL
 );
+
+CREATE TABLE libros (
+    id_libro INT AUTO_INCREMENT PRIMARY KEY,
+    titulo VARCHAR(200) NOT NULL,
+    isbn VARCHAR(50) NOT NULL UNIQUE,
+    abio_publicacion INT,
+    paginas INT,
+    idioma_escritura VARCHAR(50),
+    precio DECIMAL(10, 2) NOT NULL,
+    stock INT NOT NULL,
+    id_autor INT NOT NULL,
+    id_editorial INT NOT NULL,
+    id_genero INT NOT NULL,
+    CONSTRAINT fk_libro_autor FOREIGN KEY (id_autor) REFERENCES autores(id_autor),
+    CONSTRAINT fk_libro_editorial FOREIGN KEY (id_editorial) REFERENCES  editoriales(id_editorial),
+    CONSTRAINT fk_libro_genero FOREIGN KEY (id_genero) REERENCES generos_literarios(id_genero)
+);
+
