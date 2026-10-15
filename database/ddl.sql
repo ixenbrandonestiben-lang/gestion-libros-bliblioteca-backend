@@ -44,3 +44,20 @@ CREATE TABLE libros (
     CONSTRAINT fk_libro_genero FOREIGN KEY (id_genero) REERENCES generos_literarios(id_genero)
 );
 
+CREATE TABLE ventas(
+    di_venta INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    fecha_venta DATETIME NOT NULL,
+    total DECIMAL(10 , 0) NOT NULL,
+    CONSTRAINT fk_venta_cliente FOREIGN KEY (id_cliente) REFERENCES (id_cliente) REFERENCES clientes(id_cliente)
+);
+
+CREATE TABLE prestamos (
+    id_prestamo INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    fecha_prestamo DATE NOT NULL,
+    fecha_devolucion_esperada DATE NOT NULL,
+    fecha_devolucion_real DATE NOT NULL,
+    estado_prestamo VARCHAR(50) NOT NULL,
+    CONSTRAINT fk_prestamo_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
+);
