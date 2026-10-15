@@ -61,3 +61,13 @@ CREATE TABLE prestamos (
     estado_prestamo VARCHAR(50) NOT NULL,
     CONSTRAINT fk_prestamo_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
+
+CREATE TABLE detalle_prestamos (
+    id_detalle_prestamo INT AUTO_INCREMENT PRIMARY KEY,
+    id_prestamo INT NOT NULL,
+    id_libro INT NOT NULL,
+    estado_libro_salida VARCHAR(50),
+    estado_libro_entrada VARCHAR(50),
+    CONSTRAINT fk_detalle_prestamo_prestamo FOREIGN KEY (id_prestamo) REFERENCES prestamos (id_prestamo),
+    CONSTRAINT fk_detalle_prestamo_libro FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
+);
