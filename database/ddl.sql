@@ -8,7 +8,7 @@ CREATE TABLE autores(
 
 CREATE TABLE editoriales(
     id_editorial INT AUTO_INCREMENT PRIMARY KEY,
-    nombre_editorial VARACHAR(150) NOT NULL
+    nombre_editorial VARCHAR(150) NOT NULL
 );
 
 CREATE TABLE generos_literarios (
