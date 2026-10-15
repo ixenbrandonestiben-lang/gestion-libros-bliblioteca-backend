@@ -1,0 +1,30 @@
+{
+  "name": "gestion-libros-bliblioteca",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon --watch server.js --quiet",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ixenbrandonestiben-lang/gestion-libros-bliblioteca.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "bugs": {
+    "url": "https://github.com/ixenbrandonestiben-lang/gestion-libros-bliblioteca/issues"
+  },
+  "homepage": "https://github.com/ixenbrandonestiben-lang/gestion-libros-bliblioteca#readme",
+  "dependencies": {
+    "dotenv": "^18.0.8",
+    "express": "^5.3.0",
+    "mysql2": "^3.24.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
