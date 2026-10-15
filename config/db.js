@@ -16,8 +16,10 @@ export async function conexionBaseDeDatos() {
     try {
         const coneccion = await pool.getConnection();
         console.log('La base de datos has sido conectada exitosamente. ');
+        coneccion.release();
+        return true;
     } catch (error) {
         console.error('Error al conectar la base de datos:', error.message);
-        throw error;
+        return false;
     }
 }
