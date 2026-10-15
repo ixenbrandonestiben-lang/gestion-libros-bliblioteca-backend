@@ -31,7 +31,7 @@ CREATE TABLE libros (
     id_libro INT AUTO_INCREMENT PRIMARY KEY,
     titulo VARCHAR(200) NOT NULL,
     isbn VARCHAR(50) NOT NULL UNIQUE,
-    abio_publicacion INT,
+    anio_publicacion INT,
     paginas INT,
     idioma_escritura VARCHAR(50),
     precio DECIMAL(10, 2) NOT NULL,
@@ -41,15 +41,15 @@ CREATE TABLE libros (
     id_genero INT NOT NULL,
     CONSTRAINT fk_libro_autor FOREIGN KEY (id_autor) REFERENCES autores(id_autor),
     CONSTRAINT fk_libro_editorial FOREIGN KEY (id_editorial) REFERENCES  editoriales(id_editorial),
-    CONSTRAINT fk_libro_genero FOREIGN KEY (id_genero) REERENCES generos_literarios(id_genero)
+    CONSTRAINT fk_libro_genero FOREIGN KEY (id_genero) REFERENCES generos_literarios(id_genero)
 );
 
 CREATE TABLE ventas(
-    di_venta INT AUTO_INCREMENT PRIMARY KEY,
+    id_venta INT AUTO_INCREMENT PRIMARY KEY,
     id_cliente INT NOT NULL,
     fecha_venta DATETIME NOT NULL,
-    total DECIMAL(10 , 0) NOT NULL,
-    CONSTRAINT fk_venta_cliente FOREIGN KEY (id_cliente) REFERENCES (id_cliente) REFERENCES clientes(id_cliente)
+    total DECIMAL(10, 2) NOT NULL,
+    CONSTRAINT fk_venta_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente)
 );
 
 CREATE TABLE prestamos (
@@ -68,6 +68,6 @@ CREATE TABLE detalle_prestamos (
     id_libro INT NOT NULL,
     estado_libro_salida VARCHAR(50),
     estado_libro_entrada VARCHAR(50),
-    CONSTRAINT fk_detalle_prestamo_prestamo FOREIGN KEY (id_prestamo) REFERENCES prestamos (id_prestamo),
+    CONSTRAINT fk_detalle_prestamo_prestamo FOREIGN KEY (id_prestamo) REFERENCES prestamos(id_prestamo),
     CONSTRAINT fk_detalle_prestamo_libro FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
 );
