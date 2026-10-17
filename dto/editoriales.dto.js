@@ -3,7 +3,7 @@ export default class EditorialessDTO {
     #id_editorial;
     #nombre_editorial;
 
-    constructor({ id_autor = null, nombre_autor }) {
+    constructor({ id_editorial = null, nombre_editorial }) {
 
         this.#id_editorial = id_editorial;
         this.#nombre_editorial = nombre_editorial;
