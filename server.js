@@ -1,30 +1,61 @@
-import expres from 'express';
-import { conexionBaseDeDatos } from './config/db.js';
+import express from 'express';
 
-const app = expres();
-const PORT =  process.env.SERVER_PORT;
-const NombreBaseDAtos = process.env.DB_NAME;
+import autoresRouter from './routes/autores.router.js';
 
-app.get('/api/estado', async (req, res, next) =>{
-   try {
-     const estadoConeccion = await conexionBaseDeDatos();
+import {
+    conexionBaseDeDatos
+} from './config/db.js';
 
-    if(estadoConeccion){
-        return res.status(200).json({
-            status: "Exitoso.",
-            message: `Conexion exitosa con la base de datos: ${NombreBaseDAtos}`
-        });
-    }else{
+const app = express();
+
+const PORT = process.env.SERVER_PORT;
+const nombreBaseDatos = process.env.DB_NAME;
+
+app.use(express.json());
+
+app.use('/api/autores', autoresRouter);
+
+app.get('/api/estado', async (req, res, next) => {
+
+    try {
+
+        const estadoConexion =
+            await conexionBaseDeDatos();
+
+        if (estadoConexion) {
+
+            return res.status(200).json({
+                status: 'success',
+                message:
+                    `Conexión exitosa con ${nombreBaseDatos}`
+            });
+        }
+
         return res.status(500).json({
-            status: "Error.",
-            message: "No se buene establecer la conexion con la base de datos"
+            status: 'error',
+            message:
+                'No fue posible conectar con la base de datos'
         });
-    }
-   } catch (error) {
+
+    } catch (error) {
+
         next(error);
-   }
+    }
 });
 
-app.listen(PORT, ()=>{
-    console.log(`Base de datos corriendo en: http://localhost:${PORT}`);
+app.use((err, req, res, next) => {
+
+    console.error(err);
+
+    return res.status(500).json({
+        status: 'error',
+        message: err.message
+    });
+});
+
+app.listen(PORT, () => {
+
+    console.log(
+        `Servidor ejecutándose en http://localhost:${PORT}`
+    );
 });

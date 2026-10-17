@@ -1,7 +1,24 @@
-import body from 'express-validator';
+import { body, param } from 'express-validator';
 
-const validacionAtuores = [
-    body('nombre_autor').notEmpty().withMessage('El nombre es un campo obligatorio').isString().withMessage('El nombre debe ser texto').trim()
+const validacionAutores = [
+    param('id_autor')
+    .isInt()
+    .withMessage('El id debe ser numérico'),
+    body('nombre_autor')
+        .trim()
+        .notEmpty()
+        .withMessage('El nombre del autor es obligatorio')
+        .isString()
+        .withMessage('El nombre debe ser texto')
+        .isNumeric()
+        .withMessage('el nombre del autor tiene que ser texto')
+        .isLength({
+            min: 3,
+            max: 100
+        })
+        .withMessage(
+            'El nombre debe contener entre 3 y 100 caracteres'
+        )
 ];
 
-export default validacionAtuores;
+export default validacionAutores;
