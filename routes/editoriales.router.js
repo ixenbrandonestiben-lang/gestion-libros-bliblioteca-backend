@@ -59,7 +59,7 @@ editorialesRouter.post(
 
             const [result] = await pool.execute(
                 `
-                INSERT INTO autores (
+                INSERT INTO editoriales (
                     nombre_editorial
                 )
                 VALUES (?)
@@ -79,5 +79,56 @@ editorialesRouter.post(
         }
     }
 );
+
+editorialesRouter.put('/:id', async (req, res, next)=> {
+    try {
+        const { id }= req.params;
+        const { nombre_editorial} = req.body;
+        console.log(nombre_editorial)
+
+        const [ result ] = await pool.execute(
+            `UPDATE editoriales
+            SET nombre_editorial = IFNULL(?, nombre_editorial) WHERE id_editorial = ?`, [nombre_editorial || null, id]);
+            
+            if( result.affectedRows === 0){
+                return res.status(404).json({
+                    status: "error",
+                    message: "editorila no encontrada"
+                });
+            }
+
+            res.json({ 
+                status: "exitoso",
+                message: "Editorial actualizado con exitos"
+            })
+    } catch (error) {
+        next(error);
+    }
+});
+
+editorialesRouter.delete('/:id', async (req, res, next)=>{
+    try {
+        const { id } = req.params;
+        const [ result ] = await pool.execute(`
+            DELETE FROM editoriales 
+            WHERE id_editorial = ?`,
+             [id]
+            );
+
+            if(result.affectedRows === 0){
+                return res.status(404).json({
+                    status: "error",
+                    message: `No existe ninguna editorial con el id: ${id}`
+                });
+            }
+
+            res.json({
+                status: "exitoso",
+                message: "Editorial eliminada exitosamente"
+            });
+    } catch (error) {
+        next(error);
+    }
+});
 
 export default editorialesRouter;

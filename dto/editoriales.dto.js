@@ -20,7 +20,7 @@ export default class EditorialessDTO {
     get data() {
         return {
             id: this.#id_editorial,
-            nombre_autor: this.#nombre_editorial
+            nombre_editorial: this.#nombre_editorial
         };
     }
 }
