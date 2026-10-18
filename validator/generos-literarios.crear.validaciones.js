@@ -1,17 +1,10 @@
-import { body, param } from 'express-validator';
+import { body } from 'express-validator';
 
 const validacionGenerosLiterarios = [
-    param('id_genero')
-    .isInt()
-    .withMessage('El id debe ser numérico'),
     body('nombre_genero')
         .trim()
         .notEmpty()
         .withMessage('El nombre del genero es obligatorio')
-        .isString()
-        .withMessage('El nombre debe ser texto')
-        .isNumeric()
-        .withMessage('el nombre del genero tiene que ser texto')
         .isLength({
             min: 3,
             max: 100

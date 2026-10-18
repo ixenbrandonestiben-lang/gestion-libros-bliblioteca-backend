@@ -45,7 +45,7 @@ GenerosLiterariosRouter.post(
 
         try {
 
-            const errores = validationResult(req);
+            const errores = validationResult(req.body);
 
             if (!errores.isEmpty()) {
 
