@@ -1,7 +1,6 @@
 import express from 'express';
 
 import autoresRouter from './routes/autores.router.js';
-import GenerosLiterariosRouter from './routes/generos-literarios.router.js'
 
 import {
     conexionBaseDeDatos
@@ -15,7 +14,6 @@ const nombreBaseDatos = process.env.DB_NAME;
 app.use(express.json());
 
 app.use('/api/autores', autoresRouter);
-app.use('/api/generos', GenerosLiterariosRouter);
 
 app.get('/api/estado', async (req, res, next) => {
 
