@@ -80,4 +80,56 @@ autoresRouter.post(
     }
 );
 
+
+autoresRouter.put('/:id', async (req, res, next)=> {
+    try {
+        const { id }= req.params;
+        const { nombre_autor } = req.body;
+        console.log(nombre_autor)
+
+        const [ result ] = await pool.execute(
+            `UPDATE autores
+            SET nombre_autor = IFNULL(?, nombre_autor) WHERE id_autor = ?`, [nombre_autor || null, id]);
+            
+            if( result.affectedRows === 0){
+                return res.status(404).json({
+                    status: "error",
+                    message: "Autor no encontrado"
+                });
+            }
+
+            res.json({ 
+                status: "exitoso",
+                message: "autor actualizado con exitos"
+            })
+    } catch (error) {
+        next(error);
+    }
+});
+
+autoresRouter.delete('/:id', async (req, res, next)=>{
+    try {
+        const { id } = req.params;
+        const [ result ] = await pool.execute(`
+            DELETE FROM autores 
+            WHERE id_autor = ?`,
+             [id]
+            );
+
+            if(result.affectedRows === 0){
+                return res.status(404).json({
+                    status: "error",
+                    message: `No existe ningun autor registrado con el id: ${id}`
+                });
+            }
+
+            res.json({
+                status: "exitoso",
+                message: "Autor eliminado exitosamente"
+            });
+    } catch (error) {
+        next(error);
+    }
+});
+
 export default autoresRouter;
