@@ -1,135 +1,128 @@
 import { Router } from 'express';
 import { validationResult } from 'express-validator';
 
-import { pool } from '../config/db.js';
-import AutoresDTO from '../dto/autores.dto.js';
+import autores from '../models/autores.model.js';
 import validacionAutores from '../validator/autores.crear.validaciones.js';
+import validacionIdAutor from '../validator/autores.id.validaciones.js';
 
 const autoresRouter = Router();
 
-autoresRouter.get('/:id_autor', async (req, res, next) => {
+const validarSolicitud = (req, res, next) => {
+    const errores = validationResult(req);
 
+    if (!errores.isEmpty()) {
+        return res.status(400).json({
+            status: 'error',
+            errores: errores.array()
+        });
+    }
+
+    return next();
+};
+
+autoresRouter.get('/', async (req, res, next) => {
     try {
-
-        const [rows] = await pool.execute(
-            `
-            SELECT *
-            FROM autores
-            WHERE id_autor = ?
-            `,
-            [req.params.id_autor]
-        );
-
-        if (rows.length === 0) {
-
-            return res.status(404).json({
-                status: 'error',
-                message: 'Autor no encontrado'
-            });
-        }
-
-        const autor = new AutoresDTO(rows[0]);
-
-        return res.json(autor.data);
-
+        const resultado = await autores.listar();
+        return res.json(resultado);
     } catch (error) {
-
-        next(error);
+        return next(error);
     }
 });
 
-autoresRouter.post(
-    '/',
-    validacionAutores,
+autoresRouter.get(
+    '/:id_autor',
+    validacionIdAutor,
+    validarSolicitud,
     async (req, res, next) => {
-
         try {
+            const autor = await autores.buscarPorId(req.params.id_autor);
 
-            const errores = validationResult(req);
-
-            if (!errores.isEmpty()) {
-
-                return res.status(400).json({
+            if (!autor) {
+                return res.status(404).json({
                     status: 'error',
-                    errores: errores.array()
+                    message: 'Autor no encontrado'
                 });
             }
 
-            const autor = new AutoresDTO(req.body);
-
-            const [result] = await pool.execute(
-                `
-                INSERT INTO autores (
-                    nombre_autor
-                )
-                VALUES (?)
-                `,
-                [autor.nombre_autor]
-            );
-
-            return res.status(201).json({
-                status: 'success',
-                id: result.insertId,
-                message: 'Autor registrado correctamente'
-            });
-
+            return res.json(autor);
         } catch (error) {
-
-            next(error);
+            return next(error);
         }
     }
 );
 
+autoresRouter.post(
+    '/',
+    validacionAutores,
+    validarSolicitud,
+    async (req, res, next) => {
+        try {
+            const autor = await autores.crear(req.body);
 
-autoresRouter.put('/:id', async (req, res, next)=> {
-    try {
-        const { id }= req.params;
-        const { nombre_autor } = req.body;
-        console.log(nombre_autor)
-
-        const [ result ] = await pool.execute(
-            `UPDATE autores
-            SET nombre_autor = IFNULL(?, nombre_autor) WHERE id_autor = ?`, [nombre_autor || null, id]);
-            
-            if( result.affectedRows === 0){
-                return res.status(404).json({
-                    status: "error",
-                    message: "Autor no encontrado"
-                });
-            }
-
-            res.json({ 
-                status: "exitoso",
-                message: "autor actualizado con exitos"
-            })
-    } catch (error) {
-        next(error);
+            return res.status(201).json({
+                status: 'success',
+                id: autor.id,
+                message: 'Autor registrado correctamente'
+            });
+        } catch (error) {
+            return next(error);
+        }
     }
-});
+);
 
-autoresRouter.delete('/:id', async (req, res, next)=>{
-    try {
-        const { id } = req.params;
-        const [ result ] = await pool.execute(`
-            DELETE FROM autores 
-            WHERE id_autor = ?`,
-             [id]
+autoresRouter.put(
+    '/:id_autor',
+    validacionIdAutor,
+    validacionAutores,
+    validarSolicitud,
+    async (req, res, next) => {
+        try {
+            const autor = await autores.actualizar(
+                req.params.id_autor,
+                req.body
             );
 
-            if(result.affectedRows === 0){
+            if (!autor) {
                 return res.status(404).json({
-                    status: "error",
-                    message: `No existe ningun autor registrado con el id: ${id}`
+                    status: 'error',
+                    message: 'Autor no encontrado'
                 });
             }
 
-            res.json({
-                status: "exitoso",
-                message: "Autor eliminado exitosamente"
+            return res.json({
+                status: 'success',
+                data: autor,
+                message: 'Autor actualizado correctamente'
             });
-    } catch (error) {
-        next(error);
+        } catch (error) {
+            return next(error);
+        }
     }
-});
+);
+
+autoresRouter.delete(
+    '/:id_autor',
+    validacionIdAutor,
+    validarSolicitud,
+    async (req, res, next) => {
+        try {
+            const eliminado = await autores.eliminar(req.params.id_autor);
+
+            if (!eliminado) {
+                return res.status(404).json({
+                    status: 'error',
+                    message: `No existe ningún autor con el id: ${req.params.id_autor}`
+                });
+            }
+
+            return res.json({
+                status: 'success',
+                message: 'Autor eliminado correctamente'
+            });
+        } catch (error) {
+            return next(error);
+        }
+    }
+);
 
 export default autoresRouter;
