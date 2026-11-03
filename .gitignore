@@ -1,3 +1,5 @@
 node_modules/
-disc/
+dist/
 .env
+.env.*
+!.env.example
