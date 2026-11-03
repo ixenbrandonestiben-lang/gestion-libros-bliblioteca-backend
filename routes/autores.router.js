@@ -3,7 +3,7 @@ import { validationResult } from 'express-validator';
 
 import { pool } from '../config/db.js';
 import AutoresDTO from '../dto/autores.dto.js';
-import validacionAutores from '../src/validator/autores.crear.validaciones.js';
+import validacionAutores from '../validator/autores.crear.validaciones.js';
 
 const autoresRouter = Router();
 
