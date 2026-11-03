@@ -4,7 +4,7 @@ import autoresRouter from './routes/autores.router.js';
 
 import {
     conexionBaseDeDatos
-} from './config/db.js';
+} from './src/database/config/db.js';
 
 const app = express();
 
