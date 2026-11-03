@@ -1,13 +1,15 @@
 import { Router } from 'express';
 
-import autoresRouter from '../../routes/autores.router.js';
-import editorialesRouter from '../../routes/editoriales.router.js';
-import generosLiterariosRouter from '../../routes/generos-literarios.router.js';
+import authRouter from './auth.routes.js';
+import libroRouter from './libro.routes.js';
+import prestamoRouter from './prestamo.routes.js';
+import ventaRouter from './venta.routes.js';
 
 const routes = Router();
 
-routes.use('/autores', autoresRouter);
-routes.use('/editoriales', editorialesRouter);
-routes.use('/generos', generosLiterariosRouter);
+routes.use('/auth', authRouter);
+routes.use('/libros', libroRouter);
+routes.use('/prestamos', prestamoRouter);
+routes.use('/ventas', ventaRouter);
 
 export default routes;

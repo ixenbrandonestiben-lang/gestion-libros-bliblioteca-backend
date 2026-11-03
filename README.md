@@ -1,7 +1,6 @@
 # Biblioteca Villa API
 
-API REST para la gestión de la biblioteca, organizada por capas: rutas,
-controladores, servicios, modelos y middleware.
+API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 
 ## Requisitos
 
@@ -11,10 +10,8 @@ controladores, servicios, modelos y middleware.
 ## Configuración
 
 1. Instala las dependencias con `npm install`.
-2. Copia `.env.example` a `.env` y configura la conexión a MySQL y un valor
-   seguro para `JWT_SECRET`.
-3. Inicializa la base de datos usando el esquema existente en
-   `database/ddl.sql`.
+2. Crea un archivo `.env` en la raíz y configura las credenciales de base de
+   datos, `JWT_SECRET` y `PORT`.
 
 ## Ejecución
 
@@ -22,12 +19,4 @@ controladores, servicios, modelos y middleware.
 - Producción: `npm start`
 - Pruebas: `npm test`
 
-El servidor usa `PORT` y, por compatibilidad con la configuración existente,
-`SERVER_PORT` como alternativa.
-
-## Estructura
-
-La aplicación se inicia en `src/server.js`, configura Express en `src/app.js`
-y organiza configuración, rutas, controladores, modelos, servicios,
-validadores y middleware dentro de `src/`. Los módulos de funcionalidad se
-preparan como estructura; sus reglas y endpoints se implementarán paso a paso.
+La API agrupa sus endpoints bajo el prefijo `/api/v1`.
