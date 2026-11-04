@@ -1,7 +1,9 @@
 import { Router } from 'express';
 
 import authRouter from './auth.routes.js';
+import autorRouter from './autor.routes.js';
 import clienteRouter from './cliente.routes.js';
+import empleadoRouter from './empleado.routes.js';
 import editorialRouter from './editorial.routes.js';
 import generoLiterarioRouter from './genero-literario.routes.js';
 import libroRouter from './libro.routes.js';
@@ -16,7 +18,9 @@ routes.get('/', (req, res) => res.status(200).json({
     version: 'v1',
     endpoints: {
         auth: '/api/v1/auth',
+        autores: '/api/v1/autores',
         clientes: '/api/v1/clientes',
+        empleados: '/api/v1/empleados',
         editoriales: '/api/v1/editoriales',
         generosLiterarios: '/api/v1/generos-literarios',
         libros: '/api/v1/libros',
@@ -26,7 +30,9 @@ routes.get('/', (req, res) => res.status(200).json({
 }));
 
 routes.use('/auth', authRouter);
+routes.use('/autores', autorRouter);
 routes.use('/clientes', clienteRouter);
+routes.use('/empleados', empleadoRouter);
 routes.use('/editoriales', editorialRouter);
 routes.use('/generos-literarios', generoLiterarioRouter);
 routes.use('/libros', libroRouter);
