@@ -21,24 +21,23 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 
 La API agrupa sus endpoints bajo el prefijo `/api/v1`.
 
-## Clientes
+## Libros
 
-El CRUD de clientes está disponible en `/api/v1/clientes`:
+El CRUD de libros está disponible en `/api/v1/libros`:
 
 | Método | Ruta | Acción |
 | --- | --- | --- |
-| GET | `/api/v1/clientes` | Listar clientes |
-| GET | `/api/v1/clientes/:id` | Consultar un cliente |
-| POST | `/api/v1/clientes` | Crear un cliente |
-| PUT/PATCH | `/api/v1/clientes/:id` | Actualizar uno o más campos |
-| DELETE | `/api/v1/clientes/:id` | Eliminar un cliente |
+| GET | `/api/v1/libros` | Listar libros |
+| GET | `/api/v1/libros/:id` | Consultar un libro |
+| POST | `/api/v1/libros` | Crear un libro |
+| PUT | `/api/v1/libros/:id` | Reemplazar los campos obligatorios |
+| PATCH | `/api/v1/libros/:id` | Actualizar campos enviados |
+| DELETE | `/api/v1/libros/:id` | Eliminar un libro |
 
-Para crear un cliente se requieren `dpi`, `nombre`, `apellido`, `correo` y
-`contrasena` (mínimo 8 caracteres). `telefono` es opcional; `rol` y
-`estado_cuenta` aceptan los valores definidos por la tabla `clientes` y, si se
-omiten, usan `CLIENTE_REGULAR` y `ACTIVO`. Para actualizar, envía al menos un
-campo permitido; el rol admite `CLIENTE_REGULAR` o `CLIENTE_PREMIUM`, la
-contraseña es opcional y, cuando se envía, se guarda cifrada. Las respuestas
-nunca incluyen la contraseña. Los errores de validación responden con HTTP
-400, registros inexistentes con 404 y conflictos de duplicados o relaciones
-existentes con 409.
+Para crear un libro se requieren `titulo`, `isbn`, `precio`, `id_autor`,
+`id_editorial` e `id_genero`. `anio_publicacion`, `paginas`,
+`idioma_escritura` y `stock` son opcionales; el stock predeterminado es cero.
+El precio admite hasta dos decimales. Se valida que las referencias existan,
+que el ISBN no esté duplicado y que no se eliminen libros asociados a ventas o
+préstamos. Los errores de validación responden con HTTP 400, referencias
+inexistentes con 422, libros no encontrados con 404 y conflictos con 409.
