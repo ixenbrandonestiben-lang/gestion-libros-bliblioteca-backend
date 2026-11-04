@@ -67,6 +67,30 @@ export class ReferenciaPrestamoNoEncontradaError extends Error {
     }
 }
 
+export class PrestamoNoEncontradoError extends Error {
+    constructor(id) {
+        super(`No se encontró el préstamo con id ${id}`);
+        this.name = 'PrestamoNoEncontradoError';
+        this.status = 404;
+    }
+}
+
+export class PrestamoYaDevueltoError extends Error {
+    constructor() {
+        super('El préstamo ya fue devuelto');
+        this.name = 'PrestamoYaDevueltoError';
+        this.status = 409;
+    }
+}
+
+export class DetallesDevolucionInvalidosError extends Error {
+    constructor() {
+        super('Debe enviar una sola vez el detalle de cada libro pendiente del préstamo');
+        this.name = 'DetallesDevolucionInvalidosError';
+        this.status = 400;
+    }
+}
+
 export default class PrestamoService {
     #modelo;
 
@@ -199,6 +223,59 @@ export default class PrestamoService {
 
         if (resultado.bloqueadoPorMora) {
             throw new ClienteBloqueadoPorMoraError();
+        }
+
+        return PrestamoDTO.desdeRegistro(resultado.prestamo);
+    }
+
+    async listar({ page = 1, limit = 50, idCliente } = {}) {
+        const resultado = await this.#modelo.listar({ page, limit, idCliente });
+        const librosPorPrestamo = new Map();
+
+        for (const libro of resultado.libros) {
+            const libros = librosPorPrestamo.get(libro.id_prestamo) ?? [];
+            libros.push(libro);
+            librosPorPrestamo.set(libro.id_prestamo, libros);
+        }
+
+        return {
+            data: resultado.prestamos.map((prestamo) => PrestamoDTO.desdeRegistro({
+                ...prestamo,
+                libros: librosPorPrestamo.get(prestamo.id_prestamo) ?? []
+            })),
+            pagination: {
+                page,
+                limit,
+                total: resultado.total,
+                pages: Math.ceil(resultado.total / limit)
+            }
+        };
+    }
+
+    async buscarPorId(id, { idCliente } = {}) {
+        const prestamo = await this.#modelo.buscarPorId(id);
+
+        if (!prestamo || (
+            idCliente !== undefined
+            && prestamo.id_cliente !== idCliente
+        )) {
+            throw new PrestamoNoEncontradoError(id);
+        }
+
+        return PrestamoDTO.desdeRegistro(prestamo);
+    }
+
+    async devolver(id, libros) {
+        const resultado = await this.#modelo.devolver(id, libros);
+
+        if (resultado.notFound) {
+            throw new PrestamoNoEncontradoError(id);
+        }
+        if (resultado.alreadyReturned) {
+            throw new PrestamoYaDevueltoError();
+        }
+        if (resultado.invalidDetails) {
+            throw new DetallesDevolucionInvalidosError();
         }
 
         return PrestamoDTO.desdeRegistro(resultado.prestamo);
