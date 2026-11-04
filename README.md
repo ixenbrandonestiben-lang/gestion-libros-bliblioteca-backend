@@ -20,3 +20,15 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 - Pruebas: `npm test`
 
 La API agrupa sus endpoints bajo el prefijo `/api/v1`.
+
+## Autores
+
+- `GET /api/v1/autores`: lista autores.
+- `GET /api/v1/autores/:id_autor`: consulta un autor.
+- `POST /api/v1/autores`: crea un autor.
+- `PUT /api/v1/autores/:id_autor`: actualiza el nombre de un autor.
+- `DELETE /api/v1/autores/:id_autor`: elimina un autor si no tiene libros
+  asociados.
+
+Las operaciones de creación y actualización reciben JSON con
+`nombre_autor` (entre 3 y 150 caracteres).
