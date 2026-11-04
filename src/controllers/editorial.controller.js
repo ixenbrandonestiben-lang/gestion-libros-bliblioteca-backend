@@ -1,4 +1,4 @@
-import editorialService from '../services/editorial.service.js';
+import { editorialService } from '../services/editorial.service.js';
 
 const listar = async (req, res) => {
     const editoriales = await editorialService.listar();

@@ -1,4 +1,4 @@
-import libroService from '../services/libro.service.js';
+import { libroService } from '../services/libro.service.js';
 
 const listar = async (req, res) => {
     const libros = await libroService.listar();

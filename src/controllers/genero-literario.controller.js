@@ -1,4 +1,4 @@
-import generoLiterarioService from '../services/genero-literario.service.js';
+import { generoLiterarioService } from '../services/genero-literario.service.js';
 
 const listar = async (req, res) => {
     const generos = await generoLiterarioService.listar();

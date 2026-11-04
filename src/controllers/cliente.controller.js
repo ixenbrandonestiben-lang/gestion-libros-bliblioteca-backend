@@ -1,4 +1,4 @@
-import clienteService from '../services/cliente.service.js';
+import { clienteService } from '../services/cliente.service.js';
 
 const listar = async (req, res) => {
     const clientes = await clienteService.listar();

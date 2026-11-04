@@ -2,8 +2,8 @@ import ventaService from '../services/venta.service.js';
 
 const listar = async (req, res) => {
     const resultado = await ventaService.listar({
-        page: req.query.page,
-        limit: req.query.limit
+        page: Number(req.query.page ?? 1),
+        limit: Number(req.query.limit ?? 50)
     });
 
     return res.status(200).json({
@@ -22,7 +22,10 @@ const buscarPorId = async (req, res) => {
 };
 
 const crear = async (req, res) => {
-    const venta = await ventaService.crear(req.body);
+    const venta = await ventaService.crear({
+        ...req.body,
+        id_empleado_cajero: req.user.id_cliente
+    });
 
     return res.status(201).json({
         status: 'success',
