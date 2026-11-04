@@ -60,50 +60,50 @@ INSERT INTO generos_literarios (nombre_genero) VALUES
 -- =========================================================================
 -- 2. CLIENTES (15 registros - INCLUYENDO 2 ADMINISTRADORES)
 -- =========================================================================
--- NOTA: Las contraseñas están hasheadas con bcrypt.
+-- NOTA: Las contraseñas están hasheadas con bcrypt; son credenciales solo para desarrollo.
 -- Contraseñas en texto plano para pruebas:
---   admin123 -> $2b$12$LJ3m4ys3Lg0kVvQ6Z7w8eOqR9tY2uI5oP8aSdF3gH7jK1lM9nBcDe
---   admin456 -> $2b$12$Xy9Za8b7C6d5E4f3G2h1I0jK9lM8n7O6p5Q4r3S2t1U0v9W8x7Yz
---   cliente123 -> $2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P
+--   admin123 -> hash bcrypt válido
+--   admin456 -> hash bcrypt válido
+--   cliente123 -> hash bcrypt válido
 
 INSERT INTO clientes (dpi, nombre, apellido, telefono, correo, contrasena, rol, estado_cuenta) VALUES
 -- >>> ADMINISTRADORES <<<
 ('1234567890101', 'Carlos', 'Mendoza Rivera', '5555-1001', 'admin1@bibliotecavilla.gt', 
- '$2b$12$LJ3m4ys3Lg0kVvQ6Z7w8eOqR9tY2uI5oP8aSdF3gH7jK1lM9nBcDe', 'ADMIN', 'ACTIVO'),
+ '$2b$12$2HI.79Ry02uu2JqcYsa5ouLXlyS6V8T7MHBWRP9XZ1Gze16UNuUdG', 'ADMIN', 'ACTIVO'),
 ('9876543210101', 'María', 'Fernández López', '5555-1002', 'admin2@bibliotecavilla.gt', 
- '$2b$12$Xy9Za8b7C6d5E4f3G2h1I0jK9lM8n7O6p5Q4r3S2t1U0v9W8x7Yz', 'ADMIN', 'ACTIVO'),
+ '$2b$12$znie1G23QwtAs.KdANT4negVWhf0eo3FdBMAAwpPLvzuyWn3U6MXC', 'ADMIN', 'ACTIVO'),
 
 -- BIBLIOTECARIOS
 ('1122334450101', 'Juan', 'Pérez García', '5555-2001', 'bibliotecario1@bibliotecavilla.gt', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'BIBLIOTECARIO', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'BIBLIOTECARIO', 'ACTIVO'),
 ('2233445560101', 'Ana', 'Ramírez Solís', '5555-2002', 'bibliotecario2@bibliotecavilla.gt', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'BIBLIOTECARIO', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'BIBLIOTECARIO', 'ACTIVO'),
 
 -- CLIENTES PREMIUM
 ('3344556670101', 'Roberto', 'Castillo Morales', '5555-3001', 'roberto.castillo@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_PREMIUM', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_PREMIUM', 'ACTIVO'),
 ('4455667780101', 'Sofía', 'Hernández Díaz', '5555-3002', 'sofia.hdz@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_PREMIUM', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_PREMIUM', 'ACTIVO'),
 ('5566778890101', 'Luis', 'Gómez Torres', '5555-3003', 'luis.gomez@outlook.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_PREMIUM', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_PREMIUM', 'ACTIVO'),
 
 -- CLIENTES REGULARES
 ('6677889900101', 'Patricia', 'Vásquez Luna', '5555-4001', 'paty.vasquez@yahoo.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO'),
 ('7788990010101', 'Miguel', 'Sánchez Rivas', '5555-4002', 'miguel.sr@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO'),
 ('8899001120101', 'Elena', 'Morales Cruz', '5555-4003', 'elena.mc@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO'),
 ('9900112230101', 'Fernando', 'Reyes Aguilar', '5555-4004', 'fernando.reyes@outlook.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'SUSPENDIDO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'SUSPENDIDO'),
 ('1011223340101', 'Lucía', 'Domínguez Paredes', '5555-4005', 'lucia.dp@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO'),
 ('2122334450101', 'Andrés', 'Jiménez Vega', '5555-4006', 'andres.jv@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'BLOQUEADO_POR_MORA'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'BLOQUEADO_POR_MORA'),
 ('3233445560101', 'Valeria', 'Ortiz Méndez', '5555-4007', 'valeria.om@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO'),
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO'),
 ('4344556670101', 'Ricardo', 'Flores Castillo', '5555-4008', 'ricardo.fc@gmail.com', 
- '$2b$12$Kp8qR7s6T5u4V3w2X1y0Z9a8B7c6D5e4F3g2H1i0J9k8L7m6N5o4P', 'CLIENTE_REGULAR', 'ACTIVO');
+ '$2b$12$gnKTzWbjGrJ8UAcT3Zo/TuuAcakKFj/DdpNkR6OF9fLHlz1pmTDXm', 'CLIENTE_REGULAR', 'ACTIVO');
 
 -- =========================================================================
 -- 3. LIBROS (18 registros)

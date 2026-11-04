@@ -10,15 +10,18 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 ## Configuración
 
 1. Instala las dependencias con `npm install`.
-2. Crea un archivo `.env` en la raíz con las credenciales de MySQL, un `JWT_SECRET`
-   aleatorio de al menos 32 caracteres y `PORT`.
+2. Copia `.env.example` a `.env` y configura las credenciales de MySQL y un
+   `JWT_SECRET` aleatorio de al menos 32 caracteres. En PowerShell:
+   `Copy-Item .env.example .env`.
 3. Opcionalmente, define `CORS_ORIGINS` con los orígenes permitidos separados
    por coma. En desarrollo se permiten `http://localhost:5173`,
    `http://127.0.0.1:5173`, `http://localhost:5500` y
    `http://127.0.0.1:5500`.
 
-No uses el secreto JWT de ejemplo ni lo guardes en el repositorio. Genera uno
-con `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"`.
+Genera un secreto JWT con
+`node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"`.
+El servidor valida la configuración antes de aceptar solicitudes; si falta el
+secreto o la conexión está mal configurada, no iniciará.
 
 Variables esperadas en `.env`:
 
@@ -71,6 +74,14 @@ Authorization: Bearer <token>
 Los tokens expiran en 8 horas. El logout no revoca el JWT en el servidor: el
 frontend debe eliminarlo de su almacenamiento y volver a iniciar sesión cuando
 expire.
+
+Los usuarios incluidos en `src/database/seeds.sql` son solo para desarrollo:
+`admin1@bibliotecavilla.gt` / `admin123`, `admin2@bibliotecavilla.gt` /
+`admin456` y las demás cuentas de ejemplo / `cliente123`.
+Si ya ejecutaste una versión anterior de `seeds.sql`, aplica
+`src/database/repair-seed-passwords.sql` en la base `biblioteca_villa` para
+reparar únicamente las cuentas de ejemplo que todavía conserven sus hashes
+originales; el script no reemplaza contraseñas que ya hayan sido cambiadas.
 
 ### Crear el primer administrador
 

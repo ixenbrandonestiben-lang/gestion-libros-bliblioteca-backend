@@ -1,4 +1,7 @@
 import pool from '../config/db.js';
+import { ROLES, ROLES_PERSONAL } from '../constants/index.js';
+
+const rolesPersonalSql = ROLES_PERSONAL.map(() => '?').join(', ');
 
 const columnasPublicas = `
     id_cliente,
@@ -17,8 +20,9 @@ const listar = async () => {
     const [filas] = await pool.execute(
         `SELECT ${columnasPublicas}
          FROM clientes
-         WHERE rol IN ('ADMIN', 'BIBLIOTECARIO')
-         ORDER BY id_cliente`
+        WHERE rol IN (${rolesPersonalSql})
+        ORDER BY id_cliente`,
+        ROLES_PERSONAL
     );
 
     return filas;
@@ -40,8 +44,8 @@ const buscarEmpleado = async (id) => {
         `SELECT ${columnasPublicas}
          FROM clientes
          WHERE id_cliente = ?
-           AND rol IN ('ADMIN', 'BIBLIOTECARIO')`,
-        [id]
+          AND rol IN (${rolesPersonalSql})`,
+        [id, ...ROLES_PERSONAL]
     );
 
     return filas[0] ?? null;
@@ -89,17 +93,18 @@ const actualizar = async (id, cambios) => {
         const [administradores] = await conexion.execute(
             `SELECT id_cliente
              FROM clientes
-             WHERE rol = 'ADMIN'
+            WHERE rol = ?
                AND estado_cuenta = 'ACTIVO'
-             FOR UPDATE`
+            FOR UPDATE`,
+            [ROLES.ADMIN]
         );
         const quedaAdministradorActivo = (
-            (cambios.rol ?? cuenta.rol) === 'ADMIN'
+            (cambios.rol ?? cuenta.rol) === ROLES.ADMIN
             && (cambios.estado_cuenta ?? cuenta.estado_cuenta) === 'ACTIVO'
         );
 
         if (
-            cuenta.rol === 'ADMIN'
+            cuenta.rol === ROLES.ADMIN
             && cuenta.estado_cuenta === 'ACTIVO'
             && !quedaAdministradorActivo
             && administradores.length <= 1

@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 
+import { ROLES_PERSONAL } from '../constants/index.js';
 import EmpleadoModel from '../models/empleado.model.js';
 
 export class EmpleadoNoEncontradoError extends Error {
@@ -69,10 +70,9 @@ export class EmpleadoService {
             throw new EmpleadoNoEncontradoError(id);
         }
 
-        const rolesPersonal = ['ADMIN', 'BIBLIOTECARIO'];
         if (
-            !rolesPersonal.includes(cuentaActual.rol)
-            && !rolesPersonal.includes(datos.rol)
+            !ROLES_PERSONAL.includes(cuentaActual.rol)
+            && !ROLES_PERSONAL.includes(datos.rol)
         ) {
             throw new EmpleadoNoEncontradoError(id);
         }
