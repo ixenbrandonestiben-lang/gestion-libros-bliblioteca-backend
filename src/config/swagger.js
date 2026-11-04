@@ -52,10 +52,15 @@ const operation = (summary, tags, successDescription, options = {}) => {
         404: errorResponse('No se encontró el recurso solicitado.'),
         500: errorResponse('Error interno del servidor.')
     };
+    if (options.protected) {
+        responses[401] = errorResponse('Token Bearer faltante, inválido o expirado.');
+        responses[403] = errorResponse('El usuario autenticado no tiene el rol requerido.');
+    }
 
     return {
         summary,
         tags,
+        ...(options.protected ? { security: [{ bearerAuth: [] }] } : {}),
         ...(options.description ? { description: options.description } : {}),
         ...(options.parameters ? { parameters: options.parameters } : {}),
         ...(options.requestBody ? { requestBody: options.requestBody } : {}),
@@ -70,7 +75,13 @@ const crudPaths = ({
     createSchema,
     updateSchema,
     replaceSchema,
-    itemSchema = {}
+    itemSchema = {},
+    readProtected = false,
+    writeProtected = true,
+    includePut = true,
+    readDescription,
+    writeDescription,
+    deleteDescription = `${label} eliminado correctamente.`
 }) => {
     const collectionPath = `/${path}`;
     const itemPath = `${collectionPath}/{id}`;
@@ -78,9 +89,13 @@ const crudPaths = ({
     return {
         [collectionPath]: {
             get: operation(`Listar ${label}`, [tag], `Lista de ${label}.`, {
+                protected: readProtected,
+                description: readDescription,
                 dataSchema: { type: 'array', items: itemSchema }
             }),
             post: operation(`Crear ${label}`, [tag], `${label} creado correctamente.`, {
+                protected: writeProtected,
+                description: writeDescription,
                 status: 201,
                 requestBody: body(createSchema),
                 dataSchema: itemSchema
@@ -89,23 +104,32 @@ const crudPaths = ({
         [itemPath]: {
             parameters: [idParameter],
             get: operation(`Obtener ${label} por ID`, [tag], `${label} encontrado.`, {
+                protected: readProtected,
                 parameters: [idParameter],
                 dataSchema: itemSchema
             }),
-            put: operation(`Reemplazar ${label}`, [tag], `${label} actualizado correctamente.`, {
-                parameters: [idParameter],
-                requestBody: body(replaceSchema || updateSchema),
-                dataSchema: itemSchema
-            }),
+            ...(includePut ? {
+                put: operation(`Reemplazar ${label}`, [tag], `${label} actualizado correctamente.`, {
+                    protected: writeProtected,
+                    description: writeDescription,
+                    parameters: [idParameter],
+                    requestBody: body(replaceSchema || updateSchema),
+                    dataSchema: itemSchema
+                })
+            } : {}),
             patch: operation(`Actualizar ${label}`, [tag], `${label} actualizado correctamente.`, {
+                protected: writeProtected,
+                description: writeDescription,
                 parameters: [idParameter],
                 requestBody: body(updateSchema),
                 dataSchema: itemSchema
             }),
-            delete: operation(`Eliminar ${label}`, [tag], `${label} eliminado correctamente.`, {
+            delete: operation(`Eliminar ${label}`, [tag], deleteDescription, {
+                protected: writeProtected,
+                description: writeDescription,
                 dataSchema: null,
                 responseProperties: {
-                    message: { type: 'string', example: `${label} eliminado correctamente` }
+                    message: { type: 'string', example: deleteDescription }
                 }
             })
         }
@@ -132,6 +156,149 @@ const schemas = {
             }
         },
         required: ['status', 'message']
+    },
+    AuthRegister: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['dpi', 'nombre', 'apellido', 'correo', 'contrasena'],
+        properties: {
+            dpi: { type: 'string', maxLength: 20 },
+            nombre: { type: 'string', maxLength: 100 },
+            apellido: { type: 'string', maxLength: 100 },
+            telefono: { type: 'string', nullable: true, minLength: 7, maxLength: 20 },
+            correo: { type: 'string', format: 'email', maxLength: 250 },
+            contrasena: { type: 'string', format: 'password', minLength: 8, maxLength: 72 }
+        }
+    },
+    AuthLogin: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['correo', 'contrasena'],
+        properties: {
+            correo: { type: 'string', format: 'email' },
+            contrasena: { type: 'string', format: 'password', maxLength: 72 }
+        }
+    },
+    AuthSession: {
+        type: 'object',
+        properties: {
+            token: { type: 'string' },
+            token_type: { type: 'string', example: 'Bearer' },
+            expires_in: { type: 'integer', example: 28800 },
+            user: { $ref: '#/components/schemas/Cliente' }
+        }
+    },
+    AutorInput: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['nombre_autor'],
+        properties: {
+            nombre_autor: { type: 'string', minLength: 1, maxLength: 150 }
+        }
+    },
+    EmpleadoCreate: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['dpi', 'nombre', 'apellido', 'correo', 'contrasena', 'rol'],
+        properties: {
+            dpi: { type: 'string', maxLength: 20 },
+            nombre: { type: 'string', maxLength: 100 },
+            apellido: { type: 'string', maxLength: 100 },
+            telefono: { type: 'string', nullable: true, minLength: 7, maxLength: 20 },
+            correo: { type: 'string', format: 'email', maxLength: 250 },
+            contrasena: { type: 'string', format: 'password', minLength: 8, maxLength: 72 },
+            rol: { type: 'string', enum: ['ADMIN', 'BIBLIOTECARIO'] },
+            estado_cuenta: { type: 'string', enum: ['ACTIVO', 'SUSPENDIDO'] }
+        }
+    },
+    EmpleadoUpdate: {
+        type: 'object',
+        additionalProperties: false,
+        minProperties: 1,
+        properties: {
+            dpi: { type: 'string', maxLength: 20 },
+            nombre: { type: 'string', maxLength: 100 },
+            apellido: { type: 'string', maxLength: 100 },
+            telefono: { type: 'string', nullable: true, minLength: 7, maxLength: 20 },
+            correo: { type: 'string', format: 'email', maxLength: 250 },
+            contrasena: { type: 'string', format: 'password', minLength: 8, maxLength: 72 },
+            rol: {
+                type: 'string',
+                enum: ['ADMIN', 'BIBLIOTECARIO', 'CLIENTE_REGULAR', 'CLIENTE_PREMIUM']
+            },
+            estado_cuenta: {
+                type: 'string',
+                enum: ['ACTIVO', 'SUSPENDIDO']
+            }
+        }
+    },
+    Cliente: {
+        type: 'object',
+        properties: {
+            id_cliente: { type: 'integer' },
+            dpi: { type: 'string' },
+            nombre: { type: 'string' },
+            apellido: { type: 'string' },
+            telefono: { type: 'string', nullable: true },
+            correo: { type: 'string', format: 'email' },
+            rol: {
+                type: 'string',
+                enum: ['ADMIN', 'BIBLIOTECARIO', 'CLIENTE_REGULAR', 'CLIENTE_PREMIUM']
+            },
+            estado_cuenta: {
+                type: 'string',
+                enum: ['ACTIVO', 'SUSPENDIDO', 'BLOQUEADO_POR_MORA']
+            },
+            created_at: { type: 'string', format: 'date-time' },
+            updated_at: { type: 'string', format: 'date-time' }
+        }
+    },
+    Empleado: { $ref: '#/components/schemas/Cliente' },
+    Autor: {
+        type: 'object',
+        properties: {
+            id_autor: { type: 'integer' },
+            nombre_autor: { type: 'string' },
+            created_at: { type: 'string', format: 'date-time' }
+        }
+    },
+    Editorial: {
+        type: 'object',
+        properties: {
+            id_editorial: { type: 'integer' },
+            nombre_editorial: { type: 'string' },
+            created_at: { type: 'string', format: 'date-time' }
+        }
+    },
+    Genero: {
+        type: 'object',
+        properties: {
+            id_genero: { type: 'integer' },
+            nombre_genero: { type: 'string' },
+            created_at: { type: 'string', format: 'date-time' }
+        }
+    },
+    Libro: {
+        type: 'object',
+        properties: {
+            id_libro: { type: 'integer' },
+            titulo: { type: 'string' },
+            isbn: { type: 'string' },
+            anio_publicacion: { type: 'integer', nullable: true },
+            paginas: { type: 'integer', nullable: true },
+            idioma_escritura: { type: 'string', nullable: true },
+            precio: { type: 'number' },
+            stock: { type: 'integer' },
+            id_autor: { type: 'integer' },
+            id_editorial: { type: 'integer' },
+            id_genero: { type: 'integer' },
+            estado_disponibilidad: {
+                type: 'string',
+                enum: ['DISPONIBLE', 'AGOTADO', 'RESTRINGIDO']
+            },
+            created_at: { type: 'string', format: 'date-time' },
+            updated_at: { type: 'string', format: 'date-time' }
+        }
     },
     ClienteCreate: {
         type: 'object',
@@ -246,10 +413,9 @@ const schemas = {
     VentaCreate: {
         type: 'object',
         additionalProperties: false,
-        required: ['id_cliente', 'id_empleado_cajero', 'items'],
+        required: ['id_cliente', 'items'],
         properties: {
             id_cliente: { type: 'integer', minimum: 1, maximum: 2147483647 },
-            id_empleado_cajero: { type: 'integer', minimum: 1, maximum: 2147483647 },
             items: {
                 type: 'array',
                 minItems: 1,
@@ -272,13 +438,11 @@ const schemas = {
         additionalProperties: false,
         required: [
             'id_cliente',
-            'id_empleado_despacha',
             'fecha_devolucion_esperada',
             'libros'
         ],
         properties: {
             id_cliente: { type: 'integer', minimum: 1, maximum: 2147483647 },
-            id_empleado_despacha: { type: 'integer', minimum: 1, maximum: 2147483647 },
             fecha_devolucion_esperada: {
                 type: 'string',
                 format: 'date',
@@ -296,6 +460,66 @@ const schemas = {
                         estado_libro_salida: {
                             type: 'string',
                             enum: ['NUEVO', 'BUENO', 'DESGASTADO', 'DAÑADO']
+                        }
+                    }
+                }
+            }
+        }
+    },
+    PrestamoReturn: {
+        type: 'object',
+        additionalProperties: false,
+        required: ['libros'],
+        properties: {
+            libros: {
+                type: 'array',
+                minItems: 1,
+                description: 'Debe incluir exactamente todos los detalles pendientes del préstamo.',
+                items: {
+                    type: 'object',
+                    additionalProperties: false,
+                    required: ['id_detalle_prestamo', 'estado_libro_entrada'],
+                    properties: {
+                        id_detalle_prestamo: { type: 'integer', minimum: 1 },
+                        estado_libro_entrada: {
+                            type: 'string',
+                            enum: ['NUEVO', 'BUENO', 'DESGASTADO', 'DAÑADO', 'PERDIDO']
+                        }
+                    }
+                }
+            }
+        }
+    },
+    Prestamo: {
+        type: 'object',
+        properties: {
+            id_prestamo: { type: 'integer' },
+            id_cliente: { type: 'integer' },
+            id_empleado_despacha: { type: 'integer' },
+            fecha_prestamo: { type: 'string', format: 'date' },
+            fecha_devolucion_esperada: { type: 'string', format: 'date' },
+            fecha_devolucion_real: { type: 'string', format: 'date', nullable: true },
+            estado_prestamo: {
+                type: 'string',
+                enum: ['SOLICITADO', 'ACTIVO', 'DEVUELTO', 'VENCIDO', 'CON_MORA_PAGADA']
+            },
+            multa_acumulada: { type: 'number' },
+            created_at: { type: 'string', format: 'date-time' },
+            libros: {
+                type: 'array',
+                items: {
+                    type: 'object',
+                    properties: {
+                        id_detalle_prestamo: { type: 'integer' },
+                        id_libro: { type: 'integer' },
+                        estado_libro_salida: {
+                            type: 'string',
+                            enum: ['NUEVO', 'BUENO', 'DESGASTADO', 'DAÑADO']
+                        },
+                        estado_libro_entrada: {
+                            type: 'string',
+                            enum: ['NUEVO', 'BUENO', 'DESGASTADO', 'DAÑADO', 'PERDIDO'],
+                            nullable: true
                         }
                     }
                 }
@@ -350,46 +574,93 @@ const paths = {
         })
     },
     '/auth': {
-        get: {
-            summary: 'Consultar estado del módulo de autenticación',
-            description: 'El módulo está montado, pero todavía no implementa endpoints de autenticación.',
-            tags: ['Autenticación'],
-            responses: {
-                501: {
-                    description: 'El módulo de autenticación todavía no está implementado.',
-                    content: {
-                        'application/json': {
-                            schema: { $ref: '#/components/schemas/ErrorResponse' },
-                            example: {
-                                status: 'error',
-                                message: 'El módulo de autenticación todavía no tiene endpoints implementados.'
-                            }
-                        }
-                    }
-                }
+        get: operation('Listar endpoints de autenticación', ['Autenticación'], 'Rutas disponibles para registro, inicio/cierre de sesión y perfil.', {
+            dataSchema: null,
+            responseProperties: {
+                endpoints: { type: 'object', additionalProperties: { type: 'string' } }
             }
-        }
+        })
     },
+    '/auth/register': {
+        post: operation('Registrar cliente', ['Autenticación'], 'Cuenta regular creada y sesión iniciada.', {
+            status: 201,
+            requestBody: body('AuthRegister'),
+            dataSchema: { $ref: '#/components/schemas/AuthSession' }
+        })
+    },
+    '/auth/login': {
+        post: operation('Iniciar sesión', ['Autenticación'], 'Credenciales válidas; devuelve un JWT de 8 horas.', {
+            requestBody: body('AuthLogin'),
+            dataSchema: { $ref: '#/components/schemas/AuthSession' }
+        })
+    },
+    '/auth/me': {
+        get: operation('Consultar mi perfil', ['Autenticación'], 'Perfil del usuario autenticado.', {
+            protected: true,
+            dataSchema: { $ref: '#/components/schemas/Cliente' }
+        })
+    },
+    '/auth/logout': {
+        post: operation('Cerrar sesión', ['Autenticación'], 'Indica al frontend que elimine el token local.', {
+            protected: true,
+            dataSchema: null,
+            responseProperties: {
+                message: { type: 'string' }
+            }
+        })
+    },
+    ...crudPaths({
+        path: 'autores',
+        tag: 'Autores',
+        label: 'autores',
+        createSchema: 'AutorInput',
+        updateSchema: 'AutorInput',
+        itemSchema: { $ref: '#/components/schemas/Autor' },
+        writeDescription: 'Requiere un token Bearer con rol ADMIN o BIBLIOTECARIO.'
+    }),
     ...crudPaths({
         path: 'clientes',
         tag: 'Clientes',
         label: 'clientes',
         createSchema: 'ClienteCreate',
-        updateSchema: 'ClienteUpdate'
+        updateSchema: 'ClienteUpdate',
+        itemSchema: { $ref: '#/components/schemas/Cliente' },
+        readProtected: true,
+        writeProtected: true,
+        readDescription: 'Requiere un token Bearer con rol ADMIN.',
+        writeDescription: 'Requiere un token Bearer con rol ADMIN.'
+    }),
+    ...crudPaths({
+        path: 'empleados',
+        tag: 'Empleados',
+        label: 'empleados',
+        createSchema: 'EmpleadoCreate',
+        updateSchema: 'EmpleadoUpdate',
+        itemSchema: { $ref: '#/components/schemas/Empleado' },
+        readProtected: true,
+        writeProtected: true,
+        includePut: false,
+        deleteDescription: 'Empleado suspendido correctamente.',
+        readDescription: 'Requiere un token Bearer con rol ADMIN.',
+        writeDescription: 'Requiere un token Bearer con rol ADMIN.'
     }),
     ...crudPaths({
         path: 'editoriales',
         tag: 'Editoriales',
         label: 'editoriales',
         createSchema: 'EditorialInput',
-        updateSchema: 'EditorialInput'
+        updateSchema: 'EditorialInput',
+        itemSchema: { $ref: '#/components/schemas/Editorial' },
+        writeDescription: 'Requiere un token Bearer con rol ADMIN o BIBLIOTECARIO.'
     }),
     ...crudPaths({
         path: 'generos-literarios',
         tag: 'Géneros literarios',
         label: 'géneros literarios',
         createSchema: 'GeneroInput',
-        updateSchema: 'GeneroInput'
+        updateSchema: 'GeneroInput',
+        itemSchema: { $ref: '#/components/schemas/Genero' },
+        writeDescription: 'Requiere un token Bearer con rol ADMIN o BIBLIOTECARIO.'
     }),
     ...crudPaths({
         path: 'libros',
@@ -397,16 +668,59 @@ const paths = {
         label: 'libros',
         createSchema: 'LibroCreate',
         updateSchema: 'LibroUpdate',
-        replaceSchema: 'LibroCreate'
+        replaceSchema: 'LibroCreate',
+        itemSchema: { $ref: '#/components/schemas/Libro' },
+        writeDescription: 'Requiere un token Bearer con rol ADMIN o BIBLIOTECARIO.'
     }),
     '/prestamos': {
-        post: operation('Registrar préstamo', ['Préstamos'], 'Préstamo registrado correctamente.', {
+        get: operation('Listar préstamos', ['Préstamos'], 'Lista paginada; clientes solo ven sus préstamos.', {
+            protected: true,
+            dataSchema: { type: 'array', items: { $ref: '#/components/schemas/Prestamo' } },
+            responseProperties: {
+                pagination: { $ref: '#/components/schemas/Pagination' }
+            },
+            parameters: [
+                {
+                    name: 'page',
+                    in: 'query',
+                    schema: { type: 'integer', minimum: 1, default: 1 }
+                },
+                {
+                    name: 'limit',
+                    in: 'query',
+                    schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 }
+                }
+            ]
+        }),
+        post: operation('Registrar préstamo para un cliente', ['Préstamos'], 'Préstamo registrado; el empleado se obtiene del JWT.', {
+            protected: true,
+            description: 'Requiere ADMIN o BIBLIOTECARIO. El usuario elige el cliente; el empleado se obtiene del JWT.',
             status: 201,
-            requestBody: body('PrestamoCreate')
+            requestBody: body('PrestamoCreate'),
+            dataSchema: { $ref: '#/components/schemas/Prestamo' }
+        })
+    },
+    '/prestamos/{id}': {
+        parameters: [idParameter],
+        get: operation('Consultar préstamo', ['Préstamos'], 'Detalle del préstamo; clientes solo pueden consultar los propios.', {
+            protected: true,
+            parameters: [idParameter],
+            dataSchema: { $ref: '#/components/schemas/Prestamo' }
+        })
+    },
+    '/prestamos/{id}/devolucion': {
+        parameters: [idParameter],
+        post: operation('Registrar devolución del préstamo', ['Préstamos'], 'Registra condición de cada ejemplar y actualiza stock.', {
+            protected: true,
+            description: 'Requiere ADMIN o BIBLIOTECARIO. Debe enviar todos los detalles pendientes.',
+            parameters: [idParameter],
+            requestBody: body('PrestamoReturn'),
+            dataSchema: { $ref: '#/components/schemas/Prestamo' }
         })
     },
     '/ventas': {
         get: operation('Listar ventas', ['Ventas'], 'Ventas de la página solicitada.', {
+            protected: true,
             dataSchema: { type: 'array', items: { $ref: '#/components/schemas/Venta' } },
             responseProperties: {
                 pagination: { $ref: '#/components/schemas/Pagination' }
@@ -427,6 +741,8 @@ const paths = {
             ]
         }),
         post: operation('Registrar venta', ['Ventas'], 'Venta registrada correctamente.', {
+            protected: true,
+            description: 'Requiere ADMIN o BIBLIOTECARIO. El cajero se obtiene del JWT.',
             status: 201,
             requestBody: body('VentaCreate')
         })
@@ -434,7 +750,9 @@ const paths = {
     '/ventas/{id}': {
         parameters: [idParameter],
         get: operation('Obtener venta por ID', ['Ventas'], 'Venta encontrada.', {
-            parameters: [idParameter]
+            protected: true,
+            parameters: [idParameter],
+            dataSchema: { $ref: '#/components/schemas/Venta' }
         })
     }
 };
@@ -450,7 +768,9 @@ const swaggerSpec = {
     tags: [
         { name: 'Información' },
         { name: 'Autenticación' },
+        { name: 'Autores' },
         { name: 'Clientes' },
+        { name: 'Empleados' },
         { name: 'Editoriales' },
         { name: 'Géneros literarios' },
         { name: 'Libros' },
@@ -458,7 +778,16 @@ const swaggerSpec = {
         { name: 'Ventas' }
     ],
     paths,
-    components: { schemas }
+    components: {
+        schemas,
+        securitySchemes: {
+            bearerAuth: {
+                type: 'http',
+                scheme: 'bearer',
+                bearerFormat: 'JWT'
+            }
+        }
+    }
 };
 
 export default swaggerSpec;
