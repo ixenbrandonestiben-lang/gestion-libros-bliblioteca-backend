@@ -21,19 +21,23 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 
 La API agrupa sus endpoints bajo el prefijo `/api/v1`.
 
-## POS y consultas de ventas
+## Libros
 
-`POST /api/v1/ventas` registra una venta; `GET /api/v1/ventas` consulta el
-historial paginado y `GET /api/v1/ventas/:id` recupera una venta con su
-detalle histórico. La creación recibe `id_cliente`, `id_empleado_cajero` y
-`items`, un arreglo de `{ "id_libro": 1, "cantidad": 2 }`. El cajero debe
-pertenecer al rol `ADMIN` o `BIBLIOTECARIO` y tener cuenta activa.
+El CRUD de libros está disponible en `/api/v1/libros`:
 
-El servidor lee el precio actual de cada libro de la base de datos; no acepta
-precios ni totales del cliente. Guarda el precio por unidad en
-`precio_unitario_historico`, calcula subtotales y total con `DECIMAL` en MySQL,
-y descuenta stock en la misma transacción. Si algún artículo no existe o no
-tiene stock suficiente, no se registra parcialmente la venta. El historial
-incluye el precio histórico y los subtotales, aunque luego cambie el precio del
-catálogo. `page` (predeterminado 1) y `limit` (predeterminado 50, máximo 100)
-permiten paginar el listado.
+| Método | Ruta | Acción |
+| --- | --- | --- |
+| GET | `/api/v1/libros` | Listar libros |
+| GET | `/api/v1/libros/:id` | Consultar un libro |
+| POST | `/api/v1/libros` | Crear un libro |
+| PUT | `/api/v1/libros/:id` | Reemplazar los campos obligatorios |
+| PATCH | `/api/v1/libros/:id` | Actualizar campos enviados |
+| DELETE | `/api/v1/libros/:id` | Eliminar un libro |
+
+Para crear un libro se requieren `titulo`, `isbn`, `precio`, `id_autor`,
+`id_editorial` e `id_genero`. `anio_publicacion`, `paginas`,
+`idioma_escritura` y `stock` son opcionales; el stock predeterminado es cero.
+El precio admite hasta dos decimales. Se valida que las referencias existan,
+que el ISBN no esté duplicado y que no se eliminen libros asociados a ventas o
+préstamos. Los errores de validación responden con HTTP 400, referencias
+inexistentes con 422, libros no encontrados con 404 y conflictos con 409.
