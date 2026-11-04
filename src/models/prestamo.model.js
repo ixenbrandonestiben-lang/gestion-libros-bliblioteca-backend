@@ -182,6 +182,151 @@ const buscarPrestamoCreado = async (conexion, idPrestamo) => {
     return { ...prestamos[0], libros };
 };
 
+const listar = async ({ page, limit, idCliente }) => {
+    const conexion = pool;
+    const offset = (page - 1) * limit;
+    const filtro = idCliente === undefined ? '' : 'WHERE id_cliente = ?';
+    const valoresFiltro = idCliente === undefined ? [] : [idCliente];
+    const [prestamos] = await conexion.execute(
+        `SELECT id_prestamo, id_cliente, fecha_prestamo,
+                fecha_devolucion_esperada, fecha_devolucion_real,
+                estado_prestamo, multa_acumulada, id_empleado_despacha,
+                created_at
+         FROM prestamos
+         ${filtro}
+         ORDER BY id_prestamo DESC
+         LIMIT ? OFFSET ?`,
+        [...valoresFiltro, limit, offset]
+    );
+    const [conteo] = await conexion.execute(
+        `SELECT COUNT(*) AS total FROM prestamos ${filtro}`,
+        valoresFiltro
+    );
+
+    let libros = [];
+    if (prestamos.length > 0) {
+        const ids = prestamos.map(({ id_prestamo: id }) => id);
+        const placeholders = ids.map(() => '?').join(', ');
+        const [filasLibros] = await conexion.execute(
+            `SELECT id_detalle_prestamo, id_prestamo, id_libro,
+                    estado_libro_salida, estado_libro_entrada
+             FROM detalle_prestamos
+             WHERE id_prestamo IN (${placeholders})
+             ORDER BY id_detalle_prestamo`,
+            ids
+        );
+        libros = filasLibros;
+    }
+
+    return {
+        prestamos,
+        total: Number(conteo[0].total),
+        libros
+    };
+};
+
+const buscarPorId = async (idPrestamo) => {
+    const [prestamos] = await pool.execute(
+        `SELECT id_prestamo, id_cliente, fecha_prestamo,
+                fecha_devolucion_esperada, fecha_devolucion_real,
+                estado_prestamo, multa_acumulada, id_empleado_despacha,
+                created_at
+         FROM prestamos
+         WHERE id_prestamo = ?`,
+        [idPrestamo]
+    );
+
+    if (!prestamos[0]) {
+        return null;
+    }
+
+    const [libros] = await pool.execute(
+        `SELECT id_detalle_prestamo, id_libro,
+                estado_libro_salida, estado_libro_entrada
+         FROM detalle_prestamos
+         WHERE id_prestamo = ?
+         ORDER BY id_detalle_prestamo`,
+        [idPrestamo]
+    );
+
+    return { ...prestamos[0], libros };
+};
+
+const devolver = async (idPrestamo, librosDevueltos) => enTransaccion(async (conexion) => {
+    const [prestamos] = await conexion.execute(
+        `SELECT id_prestamo, fecha_devolucion_real
+         FROM prestamos
+         WHERE id_prestamo = ?
+         FOR UPDATE`,
+        [idPrestamo]
+    );
+
+    if (!prestamos[0]) {
+        return { notFound: true };
+    }
+    if (prestamos[0].fecha_devolucion_real !== null) {
+        return { alreadyReturned: true };
+    }
+
+    const [detalles] = await conexion.execute(
+        `SELECT id_detalle_prestamo, id_libro
+         FROM detalle_prestamos
+         WHERE id_prestamo = ?
+           AND estado_libro_entrada IS NULL
+         ORDER BY id_detalle_prestamo
+         FOR UPDATE`,
+        [idPrestamo]
+    );
+    const idsEsperados = detalles.map(({ id_detalle_prestamo: id }) => id).sort((a, b) => a - b);
+    const idsEnviados = librosDevueltos
+        .map(({ id_detalle_prestamo: id }) => id)
+        .sort((a, b) => a - b);
+
+    if (
+        idsEsperados.length === 0
+        || idsEsperados.length !== idsEnviados.length
+        || idsEsperados.some((id, index) => id !== idsEnviados[index])
+    ) {
+        return { invalidDetails: true };
+    }
+
+    const estadoPorDetalle = new Map(
+        librosDevueltos.map((libro) => [
+            libro.id_detalle_prestamo,
+            libro.estado_libro_entrada
+        ])
+    );
+
+    for (const detalle of detalles) {
+        const estadoEntrada = estadoPorDetalle.get(detalle.id_detalle_prestamo);
+        await conexion.execute(
+            `UPDATE detalle_prestamos
+             SET estado_libro_entrada = ?
+             WHERE id_detalle_prestamo = ?`,
+            [estadoEntrada, detalle.id_detalle_prestamo]
+        );
+
+        if (estadoEntrada !== 'PERDIDO') {
+            await conexion.execute(
+                'UPDATE libros SET stock = stock + 1 WHERE id_libro = ?',
+                [detalle.id_libro]
+            );
+        }
+    }
+
+    await conexion.execute(
+        `UPDATE prestamos
+         SET fecha_devolucion_real = CURRENT_DATE(),
+             estado_prestamo = 'DEVUELTO'
+         WHERE id_prestamo = ?`,
+        [idPrestamo]
+    );
+
+    return {
+        prestamo: await buscarPrestamoCreado(conexion, idPrestamo)
+    };
+});
+
 export default {
     enTransaccion,
     buscarClienteParaActualizar,
@@ -193,5 +338,8 @@ export default {
     descontarStock,
     crearEncabezado,
     crearDetalles,
-    buscarPrestamoCreado
+    buscarPrestamoCreado,
+    listar,
+    buscarPorId,
+    devolver
 };
