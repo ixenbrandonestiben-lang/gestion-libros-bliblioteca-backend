@@ -1,9 +1,12 @@
 import jwt from 'jsonwebtoken';
 
+import {
+    JWT_AUDIENCE,
+    JWT_ISSUER,
+    obtenerJwtSecret
+} from '../config/auth.js';
+import { ROLES_PERSONAL } from '../constants/index.js';
 import authService from '../services/auth.service.js';
-
-const ISSUER = 'biblioteca-villa-api';
-const AUDIENCE = 'biblioteca-villa-frontend';
 
 const noAutorizado = (res, message = 'Se requiere un token Bearer válido') => (
     res.status(401).json({
@@ -20,18 +23,14 @@ export const autenticar = async (req, res, next) => {
         return noAutorizado(res);
     }
 
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-        const error = new Error('JWT_SECRET debe configurarse con al menos 32 caracteres');
-        error.status = 500;
-        throw error;
-    }
+    const jwtSecret = obtenerJwtSecret();
 
     let payload;
 
     try {
-        payload = jwt.verify(coincidencia[1], process.env.JWT_SECRET, {
-            issuer: ISSUER,
-            audience: AUDIENCE
+        payload = jwt.verify(coincidencia[1], jwtSecret, {
+            issuer: JWT_ISSUER,
+            audience: JWT_AUDIENCE
         });
     } catch (error) {
         if (error.name === 'TokenExpiredError') {
@@ -64,4 +63,4 @@ export const autorizarRoles = (...roles) => (req, res, next) => {
     return next();
 };
 
-export const esPersonal = autorizarRoles('ADMIN', 'BIBLIOTECARIO');
+export const esPersonal = autorizarRoles(...ROLES_PERSONAL);

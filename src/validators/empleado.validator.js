@@ -1,4 +1,5 @@
 import { body, param } from 'express-validator';
+import { ROLES_PERSONAL, TODOS_LOS_ROLES } from '../constants/index.js';
 
 const camposPermitidos = new Set([
     'dpi',
@@ -72,7 +73,7 @@ const contrasena = (requerida = false) => {
 };
 
 const rolEmpleado = () => body('rol')
-    .isIn(['ADMIN', 'BIBLIOTECARIO'])
+    .isIn(ROLES_PERSONAL)
     .withMessage('El rol debe ser ADMIN o BIBLIOTECARIO');
 
 const estadoCuenta = () => body('estado_cuenta')
@@ -124,7 +125,7 @@ const actualizarEmpleadoRules = [
     contrasena(),
     body('rol')
         .optional({ values: 'undefined' })
-        .isIn(['ADMIN', 'BIBLIOTECARIO', 'CLIENTE_REGULAR', 'CLIENTE_PREMIUM'])
+        .isIn(TODOS_LOS_ROLES)
         .withMessage('El rol de cuenta no es válido'),
     estadoCuenta()
 ];

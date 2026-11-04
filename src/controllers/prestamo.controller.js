@@ -1,10 +1,11 @@
 import { prestamoService } from '../services/prestamo.service.js';
+import { ROLES_PERSONAL } from '../constants/index.js';
 
 const listar = async (req, res) => {
     const resultado = await prestamoService.listar({
         page: Number(req.query.page ?? 1),
         limit: Number(req.query.limit ?? 50),
-        ...(req.user.rol === 'ADMIN' || req.user.rol === 'BIBLIOTECARIO'
+        ...(ROLES_PERSONAL.includes(req.user.rol)
             ? {}
             : { idCliente: req.user.id_cliente })
     });
@@ -18,7 +19,7 @@ const listar = async (req, res) => {
 const buscarPorId = async (req, res) => {
     const prestamo = await prestamoService.buscarPorId(
         req.params.id,
-        req.user.rol === 'ADMIN' || req.user.rol === 'BIBLIOTECARIO'
+        ROLES_PERSONAL.includes(req.user.rol)
             ? {}
             : { idCliente: req.user.id_cliente }
     );

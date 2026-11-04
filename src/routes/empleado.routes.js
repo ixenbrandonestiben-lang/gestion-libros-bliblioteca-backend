@@ -5,6 +5,7 @@ import {
     autenticar,
     autorizarRoles
 } from '../middlewares/auth.middleware.js';
+import { ROLES } from '../constants/index.js';
 import validatorMiddleware from '../middlewares/validator.middleware.js';
 import {
     actualizarEmpleadoRules,
@@ -13,7 +14,7 @@ import {
 } from '../validators/empleado.validator.js';
 
 const empleadoRouter = Router();
-const soloAdmin = [autenticar, autorizarRoles('ADMIN')];
+const soloAdmin = [autenticar, autorizarRoles(ROLES.ADMIN)];
 
 empleadoRouter.get('/', ...soloAdmin, empleadoController.listar);
 empleadoRouter.get(

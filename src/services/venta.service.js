@@ -1,3 +1,4 @@
+import { ROLES_PERSONAL } from '../constants/index.js';
 import VentaDTO from '../dtos/venta.dto.js';
 import VentaModel from '../models/venta.model.js';
 
@@ -93,7 +94,7 @@ export class VentaService {
                 throw new CajeroNoEncontradoError(datos.id_empleado_cajero);
             }
 
-            if (!['ADMIN', 'BIBLIOTECARIO'].includes(cajero.rol)) {
+            if (!ROLES_PERSONAL.includes(cajero.rol)) {
                 throw new CajeroNoAutorizadoError();
             }
 

@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { ROLES } from '../constants/index.js';
 
 const buscarPorCorreo = async (correo) => {
     const [filas] = await pool.execute(
@@ -28,14 +29,15 @@ const crearCliente = async (cliente) => {
     const [resultado] = await pool.execute(
         `INSERT INTO clientes
             (dpi, nombre, apellido, telefono, correo, contrasena, rol, estado_cuenta)
-         VALUES (?, ?, ?, ?, ?, ?, 'CLIENTE_REGULAR', 'ACTIVO')`,
+        VALUES (?, ?, ?, ?, ?, ?, ?, 'ACTIVO')`,
         [
             cliente.dpi,
             cliente.nombre,
             cliente.apellido,
             cliente.telefono ?? null,
             cliente.correo,
-            cliente.contrasena
+           cliente.contrasena,
+           ROLES.CLIENTE_REGULAR
         ]
     );
 

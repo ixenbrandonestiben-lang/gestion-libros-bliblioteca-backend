@@ -62,6 +62,36 @@ test('register always creates a regular client and returns a JWT session', async
     assert.equal(payload.rol, 'CLIENTE_REGULAR');
 });
 
+test('register does not create an account when JWT configuration is missing', async () => {
+    const secret = process.env.JWT_SECRET;
+    delete process.env.JWT_SECRET;
+    let insertAttempted = false;
+    const service = new AuthService({
+        modelo: {
+            async crearCliente() {
+                insertAttempted = true;
+            }
+        }
+    });
+
+    try {
+        await assert.rejects(
+            service.registrar({
+                dpi: 'TEST-003',
+                nombre: 'Ada',
+                apellido: 'Prueba',
+                correo: 'ada3@example.com',
+                contrasena: 'ClaveSegura123'
+            }),
+            (error) => error.status === 500
+                && error.message.includes('JWT_SECRET')
+        );
+        assert.equal(insertAttempted, false);
+    } finally {
+        process.env.JWT_SECRET = secret;
+    }
+});
+
 test('login rejects an incorrect password with a generic 401 error', async () => {
     const hash = await bcrypt.hash('ClaveCorrecta123', 4);
     const service = new AuthService({

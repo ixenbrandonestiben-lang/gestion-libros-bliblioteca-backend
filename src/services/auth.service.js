@@ -1,12 +1,14 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 
+import {
+    JWT_AUDIENCE,
+    JWT_EXPIRATION_SECONDS,
+    JWT_ISSUER,
+    obtenerJwtSecret
+} from '../config/auth.js';
 import AuthDTO from '../dtos/auth.dto.js';
 import AuthModel from '../models/auth.model.js';
-
-const ISSUER = 'biblioteca-villa-api';
-const AUDIENCE = 'biblioteca-villa-frontend';
-const TOKEN_EXPIRATION = '8h';
 
 export class CredencialesInvalidasError extends Error {
     constructor() {
@@ -32,16 +34,6 @@ export class CorreoRegistradoError extends Error {
     }
 }
 
-const obtenerSecreto = () => {
-    if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
-        const error = new Error('JWT_SECRET debe configurarse con al menos 32 caracteres');
-        error.status = 500;
-        throw error;
-    }
-
-    return process.env.JWT_SECRET;
-};
-
 export class AuthService {
     #modelo;
 
@@ -50,6 +42,7 @@ export class AuthService {
     }
 
     async registrar(datos) {
+        obtenerJwtSecret();
         const contrasena = await bcrypt.hash(datos.contrasena, 12);
 
         try {
@@ -81,12 +74,12 @@ export class AuthService {
 
         const token = jwt.sign(
             { rol: usuario.rol },
-            obtenerSecreto(),
+            obtenerJwtSecret(),
             {
                 subject: String(usuario.id_cliente),
-                issuer: ISSUER,
-                audience: AUDIENCE,
-                expiresIn: TOKEN_EXPIRATION
+                issuer: JWT_ISSUER,
+                audience: JWT_AUDIENCE,
+                expiresIn: JWT_EXPIRATION_SECONDS
             }
         );
 

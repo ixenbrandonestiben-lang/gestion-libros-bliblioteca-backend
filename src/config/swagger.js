@@ -1,3 +1,10 @@
+import {
+    ROLES,
+    ROLES_CLIENTE,
+    ROLES_PERSONAL,
+    TODOS_LOS_ROLES
+} from '../constants/index.js';
+
 const respuesta = (description, dataSchema = {}, extraProperties = {}) => ({
     description,
     content: {
@@ -207,7 +214,7 @@ const schemas = {
             telefono: { type: 'string', nullable: true, minLength: 7, maxLength: 20 },
             correo: { type: 'string', format: 'email', maxLength: 250 },
             contrasena: { type: 'string', format: 'password', minLength: 8, maxLength: 72 },
-            rol: { type: 'string', enum: ['ADMIN', 'BIBLIOTECARIO'] },
+            rol: { type: 'string', enum: ROLES_PERSONAL },
             estado_cuenta: { type: 'string', enum: ['ACTIVO', 'SUSPENDIDO'] }
         }
     },
@@ -224,7 +231,7 @@ const schemas = {
             contrasena: { type: 'string', format: 'password', minLength: 8, maxLength: 72 },
             rol: {
                 type: 'string',
-                enum: ['ADMIN', 'BIBLIOTECARIO', 'CLIENTE_REGULAR', 'CLIENTE_PREMIUM']
+                enum: TODOS_LOS_ROLES
             },
             estado_cuenta: {
                 type: 'string',
@@ -243,7 +250,7 @@ const schemas = {
             correo: { type: 'string', format: 'email' },
             rol: {
                 type: 'string',
-                enum: ['ADMIN', 'BIBLIOTECARIO', 'CLIENTE_REGULAR', 'CLIENTE_PREMIUM']
+                enum: TODOS_LOS_ROLES
             },
             estado_cuenta: {
                 type: 'string',
@@ -319,8 +326,8 @@ const schemas = {
             },
             rol: {
                 type: 'string',
-                enum: ['CLIENTE_REGULAR', 'CLIENTE_PREMIUM'],
-                default: 'CLIENTE_REGULAR'
+                enum: ROLES_CLIENTE,
+                default: ROLES.CLIENTE_REGULAR
             },
             estado_cuenta: {
                 type: 'string',
@@ -346,7 +353,7 @@ const schemas = {
                 maxLength: 72,
                 description: 'Máximo 72 bytes UTF-8.'
             },
-            rol: { type: 'string', enum: ['CLIENTE_REGULAR', 'CLIENTE_PREMIUM'] },
+            rol: { type: 'string', enum: ROLES_CLIENTE },
             estado_cuenta: {
                 type: 'string',
                 enum: ['ACTIVO', 'SUSPENDIDO', 'BLOQUEADO_POR_MORA']
