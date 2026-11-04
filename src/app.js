@@ -2,6 +2,7 @@ import express from 'express';
 import passport from 'passport';
 import swaggerUi from 'swagger-ui-express';
 
+import corsMiddleware from './middlewares/cors.middleware.js';
 import errorHandler from './middlewares/errorHandler.middleware.js';
 import routes from './routes/index.js';
 import swaggerSpec from './config/swagger.js';
@@ -9,6 +10,7 @@ import swaggerSpec from './config/swagger.js';
 const app = express();
 
 app.use(express.json());
+app.use(corsMiddleware);
 app.use(passport.initialize());
 app.get('/api-docs.json', (req, res) => res.json(swaggerSpec));
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
