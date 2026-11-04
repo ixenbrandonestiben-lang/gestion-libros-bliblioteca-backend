@@ -349,6 +349,27 @@ const paths = {
             }
         })
     },
+    '/auth': {
+        get: {
+            summary: 'Consultar estado del módulo de autenticación',
+            description: 'El módulo está montado, pero todavía no implementa endpoints de autenticación.',
+            tags: ['Autenticación'],
+            responses: {
+                501: {
+                    description: 'El módulo de autenticación todavía no está implementado.',
+                    content: {
+                        'application/json': {
+                            schema: { $ref: '#/components/schemas/ErrorResponse' },
+                            example: {
+                                status: 'error',
+                                message: 'El módulo de autenticación todavía no tiene endpoints implementados.'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
     ...crudPaths({
         path: 'clientes',
         tag: 'Clientes',
@@ -428,6 +449,7 @@ const swaggerSpec = {
     servers: [{ url: '/api/v1', description: 'API v1 del mismo servidor' }],
     tags: [
         { name: 'Información' },
+        { name: 'Autenticación' },
         { name: 'Clientes' },
         { name: 'Editoriales' },
         { name: 'Géneros literarios' },

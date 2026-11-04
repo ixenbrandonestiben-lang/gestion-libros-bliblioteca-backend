@@ -21,6 +21,12 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 
 La API agrupa sus endpoints bajo el prefijo `/api/v1`.
 
+## Autenticación
+
+El módulo está montado en `/api/v1/auth`, pero aún no implementa inicio de
+sesión ni otros endpoints de autenticación. `GET /api/v1/auth` responde con
+HTTP 501 y un mensaje JSON para indicar que la funcionalidad no está disponible.
+
 ## Libros
 
 El CRUD de libros está disponible en `/api/v1/libros`:
