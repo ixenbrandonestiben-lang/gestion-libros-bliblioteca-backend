@@ -21,16 +21,23 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 
 La API agrupa sus endpoints bajo el prefijo `/api/v1`.
 
-## Creación transaccional de préstamos
+## Libros
 
-`POST /api/v1/prestamos` recibe `id_cliente`, `id_empleado_despacha`,
-`fecha_devolucion_esperada` en formato `YYYY-MM-DD` y un arreglo no vacío
-`libros` con `id_libro` y, opcionalmente, `estado_libro_salida`.
+El CRUD de libros está disponible en `/api/v1/libros`:
 
-La creación bloquea las filas del cliente y de los libros, valida la cuenta,
-la fecha y el stock, y registra el préstamo, sus detalles y la disminución de
-stock dentro de una única transacción. Si el cliente tiene un préstamo activo
-vencido sin devolución, la operación no se crea: el préstamo vencido se marca
-`VENCIDO`, la cuenta se marca `BLOQUEADO_POR_MORA` y se responde HTTP 409. Un
-cliente ya bloqueado o suspendido tampoco puede recibir préstamos. Cualquier
-otro fallo durante la creación revierte todos los cambios de la transacción.
+| Método | Ruta | Acción |
+| --- | --- | --- |
+| GET | `/api/v1/libros` | Listar libros |
+| GET | `/api/v1/libros/:id` | Consultar un libro |
+| POST | `/api/v1/libros` | Crear un libro |
+| PUT | `/api/v1/libros/:id` | Reemplazar los campos obligatorios |
+| PATCH | `/api/v1/libros/:id` | Actualizar campos enviados |
+| DELETE | `/api/v1/libros/:id` | Eliminar un libro |
+
+Para crear un libro se requieren `titulo`, `isbn`, `precio`, `id_autor`,
+`id_editorial` e `id_genero`. `anio_publicacion`, `paginas`,
+`idioma_escritura` y `stock` son opcionales; el stock predeterminado es cero.
+El precio admite hasta dos decimales. Se valida que las referencias existan,
+que el ISBN no esté duplicado y que no se eliminen libros asociados a ventas o
+préstamos. Los errores de validación responden con HTTP 400, referencias
+inexistentes con 422, libros no encontrados con 404 y conflictos con 409.
