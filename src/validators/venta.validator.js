@@ -2,7 +2,6 @@ import { body, param, query } from 'express-validator';
 
 const camposPermitidos = new Set([
     'id_cliente',
-    'id_empleado_cajero',
     'items'
 ]);
 
@@ -53,10 +52,6 @@ const crearVentaRules = [
     body('id_cliente')
         .isInt({ min: 1, max: 2147483647 })
         .withMessage('El id del cliente debe ser un entero positivo')
-        .toInt(),
-    body('id_empleado_cajero')
-        .isInt({ min: 1, max: 2147483647 })
-        .withMessage('El id del cajero debe ser un entero positivo')
         .toInt(),
     validarItems
 ];
