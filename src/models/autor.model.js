@@ -1,71 +1,41 @@
-import database from '../config/db.js';
-
 export default class AutorModel {
-    #database;
+    #idAutor;
+    #nombreAutor;
 
-    constructor({ database: databaseInyectada = database } = {}) {
-        this.#database = databaseInyectada;
+    constructor({ id_autor = null, nombre_autor }) {
+        this.#idAutor = id_autor;
+        this.#nombreAutor = nombre_autor;
     }
 
-    async listar() {
-        const [filas] = await this.#database.execute(
-            `
-            SELECT id_autor, nombre_autor
-            FROM autores
-            ORDER BY id_autor
-            `
-        );
+    static desdeEntrada(datos) {
+        if (typeof datos?.nombre_autor !== 'string') {
+            throw new TypeError('nombre_autor debe ser texto');
+        }
 
-        return filas;
+        return new AutorModel({
+            nombre_autor: datos.nombre_autor.trim()
+        });
     }
 
-    async buscarPorId(id_autor) {
-        const [filas] = await this.#database.execute(
-            `
-            SELECT id_autor, nombre_autor
-            FROM autores
-            WHERE id_autor = ?
-            `,
-            [id_autor]
-        );
-
-        return filas[0] ?? null;
+    static desdeRegistro(registro) {
+        return new AutorModel({
+            id_autor: registro.id_autor,
+            nombre_autor: registro.nombre_autor
+        });
     }
 
-    async crear(nombre_autor) {
-        const [resultado] = await this.#database.execute(
-            `
-            INSERT INTO autores (nombre_autor)
-            VALUES (?)
-            `,
-            [nombre_autor]
-        );
-
-        return resultado.insertId;
+    get id_autor() {
+        return this.#idAutor;
     }
 
-    async actualizar(id_autor, nombre_autor) {
-        const [resultado] = await this.#database.execute(
-            `
-            UPDATE autores
-            SET nombre_autor = ?
-            WHERE id_autor = ?
-            `,
-            [nombre_autor, id_autor]
-        );
-
-        return resultado.affectedRows > 0;
+    get nombre_autor() {
+        return this.#nombreAutor;
     }
 
-    async eliminar(id_autor) {
-        const [resultado] = await this.#database.execute(
-            `
-            DELETE FROM autores
-            WHERE id_autor = ?
-            `,
-            [id_autor]
-        );
-
-        return resultado.affectedRows > 0;
+    get datos() {
+        return {
+            id_autor: this.#idAutor,
+            nombre_autor: this.#nombreAutor
+        };
     }
 }
