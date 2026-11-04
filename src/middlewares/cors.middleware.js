@@ -1,5 +1,10 @@
 const originsPermitidos = new Set(
-    (process.env.CORS_ORIGINS || 'http://localhost:5173,http://127.0.0.1:5173')
+    (process.env.CORS_ORIGINS || [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'http://localhost:5500',
+        'http://127.0.0.1:5500'
+    ].join(','))
         .split(',')
         .map((origin) => origin.trim())
         .filter(Boolean)

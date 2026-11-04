@@ -13,8 +13,9 @@ API REST de gestión bibliotecaria organizada por capas dentro de `src/`.
 2. Crea un archivo `.env` en la raíz con las credenciales de MySQL, un `JWT_SECRET`
    aleatorio de al menos 32 caracteres y `PORT`.
 3. Opcionalmente, define `CORS_ORIGINS` con los orígenes permitidos separados
-   por coma. En desarrollo se permiten `http://localhost:5173` y
-   `http://127.0.0.1:5173`.
+   por coma. En desarrollo se permiten `http://localhost:5173`,
+   `http://127.0.0.1:5173`, `http://localhost:5500` y
+   `http://127.0.0.1:5500`.
 
 No uses el secreto JWT de ejemplo ni lo guardes en el repositorio. Genera uno
 con `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"`.
@@ -28,8 +29,8 @@ DB_USER=tu_usuario_mysql
 DB_PASSWORD=tu_contrasena_mysql
 DB_NAME=biblioteca_villa
 JWT_SECRET=reemplazar_por_un_secreto_aleatorio_de_32_caracteres_o_mas
-PORT=3000
-CORS_ORIGINS=http://localhost:5173
+PORT=3001
+CORS_ORIGINS=http://localhost:5500
 ```
 
 ## Ejecución
