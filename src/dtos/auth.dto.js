@@ -1,3 +1,5 @@
+import { JWT_EXPIRATION_SECONDS } from '../config/auth.js';
+
 const usuarioPublico = (usuario) => ({
     id_cliente: usuario.id_cliente,
     dpi: usuario.dpi,
@@ -20,7 +22,7 @@ export default class AuthDTO {
         return {
             token,
             token_type: 'Bearer',
-            expires_in: 28800,
+            expires_in: JWT_EXPIRATION_SECONDS,
             user: usuarioPublico(usuario)
         };
     }

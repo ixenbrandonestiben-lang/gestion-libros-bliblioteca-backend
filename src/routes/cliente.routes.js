@@ -5,6 +5,7 @@ import {
     autenticar,
     autorizarRoles
 } from '../middlewares/auth.middleware.js';
+import { ROLES } from '../constants/index.js';
 import validatorMiddleware from '../middlewares/validator.middleware.js';
 import {
     crearClienteRules,
@@ -13,7 +14,7 @@ import {
 } from '../validators/cliente.validator.js';
 
 const clienteRouter = Router();
-const soloAdmin = [autenticar, autorizarRoles('ADMIN')];
+const soloAdmin = [autenticar, autorizarRoles(ROLES.ADMIN)];
 
 clienteRouter.get('/', ...soloAdmin, clienteController.listar);
 clienteRouter.get(

@@ -1,6 +1,6 @@
 import { body, param } from 'express-validator';
+import { ROLES_CLIENTE } from '../constants/index.js';
 
-const rolesCliente = ['CLIENTE_REGULAR', 'CLIENTE_PREMIUM'];
 const estadosCuenta = ['ACTIVO', 'SUSPENDIDO', 'BLOQUEADO_POR_MORA'];
 const camposPermitidos = new Set([
     'dpi',
@@ -83,7 +83,7 @@ const contrasena = (requerida = false) => {
 
 const rol = () => body('rol')
     .optional({ values: 'undefined' })
-    .isIn(rolesCliente).withMessage('El rol de cliente no es válido');
+    .isIn(ROLES_CLIENTE).withMessage('El rol de cliente no es válido');
 
 const estadoCuenta = () => body('estado_cuenta')
     .optional({ values: 'undefined' })

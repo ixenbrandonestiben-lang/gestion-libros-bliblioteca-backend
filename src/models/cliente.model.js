@@ -1,4 +1,5 @@
 import pool from '../config/db.js';
+import { ROLES } from '../constants/index.js';
 
 const columnasPublicas = `
     id_cliente,
@@ -49,7 +50,7 @@ const crear = async (cliente) => {
         telefono = null,
         correo,
         contrasena,
-        rol = 'CLIENTE_REGULAR',
+        rol = ROLES.CLIENTE_REGULAR,
         estado_cuenta = 'ACTIVO'
     } = cliente;
 
